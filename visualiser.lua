@@ -14,6 +14,7 @@ local x_pos, y_pos = 0, 0
 
 -- The range and scale of the graph
 local x_min_scale, x_max_scale, y_min_scale, y_max_scale = 0, 0, 0, 0
+local x_range, y_range = 0, 0
 
 -- Step size for the graph
 -- the step between each point on the graph
@@ -24,13 +25,14 @@ local is_moving = false
 local x_pos_start, y_pos_start = 0, 0
 local dx, dy = 0, 0
 
--- local function variavle
+-- points
+local points = {}
 
 function f(x)
     -- The function to be visualised
     -- overcomplicated function for demonstration purposes
     -- return math.cos(math.pi * x) * math.sin(a - x)
-    return math.sin(x + time)
+    return math.exp(x)
 end
 
 function visualiser.handle_input(key)
@@ -57,10 +59,13 @@ function visualiser.handle_mouse_move(x, y)
         dx = x - x_pos_start
         dy = y - y_pos_start
 
-        x_min = x_min - dx * (x_max - x_min) / love.graphics.getWidth()
-        x_max = x_max - dx * (x_max - x_min) / love.graphics.getWidth()
-        y_min = y_min + dy * (y_max - y_min) / love.graphics.getHeight()
-        y_max = y_max + dy * (y_max - y_min) / love.graphics.getHeight()
+        x_range = x_max - x_min
+        y_range = y_max - y_min
+
+        x_min = x_min - dx * x_range / love.graphics.getWidth()
+        x_max = x_max - dx * x_range / love.graphics.getWidth()
+        y_min = y_min + dy * y_range / love.graphics.getHeight()
+        y_max = y_max + dy * y_range / love.graphics.getHeight()
 
         x_pos_start, y_pos_start = x, y
     end
@@ -71,10 +76,10 @@ function visualiser.handle_scroll(x, y)
     -- The zoom needs to be centered around the mouse position
     x_pos, y_pos = love.mouse.getPosition()
 
-    local x_min_scale = x_min + x_pos / WINDOW_WIDTH * (x_max - x_min)
-    local x_max_scale = x_max - (WINDOW_WIDTH - x_pos) / WINDOW_WIDTH * (x_max - x_min)
-    local y_min_scale = y_min + (WINDOW_HEIGHT - y_pos) / WINDOW_HEIGHT * (y_max - y_min)
-    local y_max_scale = y_max - y_pos / WINDOW_HEIGHT * (y_max - y_min)
+    x_min_scale = x_min + x_pos / WINDOW_WIDTH * (x_max - x_min)
+    x_max_scale = x_max - (WINDOW_WIDTH - x_pos) / WINDOW_WIDTH * (x_max - x_min)
+    y_min_scale = y_min + (WINDOW_HEIGHT - y_pos) / WINDOW_HEIGHT * (y_max - y_min)
+    y_max_scale = y_max - y_pos / WINDOW_HEIGHT * (y_max - y_min)
 
     if y > 0 then
         x_min = x_min + (x_min_scale - x_min) / 10
@@ -121,12 +126,15 @@ function visualiser.draw()
     love.graphics.line((0 - x_min) * x_scale, 0, (0 - x_min) * x_scale, height)
 
     love.graphics.setColor(1, 0, 0)
+    points = {}
     for x = x_min, x_max, step do
         local y = f(x)
         local x_pixel = (x - x_min) * x_scale
         local y_pixel = height - (y - y_min) * y_scale
-        love.graphics.rectangle("fill", x_pixel, y_pixel, 2, 2)
+        table.insert(points, x_pixel)
+        table.insert(points, y_pixel)
     end
+    love.graphics.line(points)
 end
 
 return visualiser
