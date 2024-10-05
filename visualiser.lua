@@ -32,7 +32,7 @@ function f(x)
     -- The function to be visualised
     -- overcomplicated function for demonstration purposes
     -- return math.cos(math.pi * x) * math.sin(a - x)
-    return math.exp(x)
+    return math.sin(x + time) + math.sin(2 * x + time) + math.sin(3 * x + time) + math.sin(4 * x + time) + math.sin(5 * x + time) + math.sin(6 * x + time) + math.sin(7 * x + time) + math.sin(8 * x + time) + math.sin(9 * x + time) + math.sin(10 * x + time)
 end
 
 function visualiser.handle_input(key)
