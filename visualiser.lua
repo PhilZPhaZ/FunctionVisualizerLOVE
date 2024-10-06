@@ -107,19 +107,15 @@ function visualiser.handle_scroll(x, y)
         x_max = x_max - (x_max - x_max_scale) / 10
         y_min = y_min + (y_min_scale - y_min) / 10
         y_max = y_max - (y_max - y_max_scale) / 10
-        -- update zoom factor depending on the scroll direction
-        zoom_factor = zoom_factor * 1.1
     else
         x_min = x_min - (x_min_scale - x_min) / 10
         x_max = x_max + (x_max - x_max_scale) / 10
         y_min = y_min - (y_min_scale - y_min) / 10
         y_max = y_max + (y_max - y_max_scale) / 10
-        -- update zoom factor
-        zoom_factor = zoom_factor / 1.1
     end
 
     -- update font size
-    local temp_font_size = 15 * zoom_factor
+    local temp_font_size = 15 / zoom_factor
     if temp_font_size < 1 then
         font_size = 1
     else
@@ -138,6 +134,10 @@ function visualiser.update(dt)
 
     -- font size
     font = love.graphics.newFont("assets/fonts/NotoSansMath-Regular.ttf", font_size)
+
+    -- update zoom factor based on x_min, x_max, y_min, y_max
+    zoom_factor = (x_max - x_min) / 20
+    print(zoom_factor)
 
     -- update the time
     time = time + speed * dt
@@ -167,7 +167,7 @@ function visualiser.draw()
 
     -- draw the unit line depending on the window dimensions, x_min, x_max, y_min, y_max
     -- draw vertical unit line
-    if zoom_factor > 0.1 then
+    if zoom_factor < 7 then
         love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
         for x = math.ceil(x_min), math.floor(x_max) do
             local x_pixel = (x - x_min) * x_scale
@@ -182,6 +182,7 @@ function visualiser.draw()
     end
 
     -- draw the number labels
+    -- this piece of shit is a lag machine
     if font_size > 5 then
         love.graphics.setFont(font)
         love.graphics.setColor(1, 1, 1)
