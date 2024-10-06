@@ -42,7 +42,8 @@ local points = {}
 function f(x)
     -- The function to be visualised
     -- overcomplicated function for demonstration purposes
-    return math.cos(math.pi * x) * math.sin(time - x)
+    -- return math.cos(math.pi * x) * math.sin(time - x)
+    return 5 * math.exp(-x ^ 2 / 15) * math.cos(2 * math.pi * x - time)
 end
 
 function visualiser.load()
@@ -137,7 +138,6 @@ function visualiser.update(dt)
 
     -- update zoom factor based on x_min, x_max, y_min, y_max
     zoom_factor = (x_max - x_min) / 20
-    print(zoom_factor)
 
     -- update the time
     time = time + speed * dt
