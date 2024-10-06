@@ -1,13 +1,23 @@
+--[[
+
+]]
+
 local visualiser = {}
+
+-- Font
+local font
+local font_size = 15
 
 -- time
 local time = 0
+local time_cap = 2 * math.pi
+local speed = 1
 
--- Window dimensions
-local x_min = -10
-local x_max = 10
-local y_min = -10
-local y_max = 10
+-- The range of the graph
+-- the 2 units should have the same length depending on the window dimensions
+local aspect_ratio = love.graphics.getWidth() / love.graphics.getHeight()
+local x_min, x_max = -10, 10
+local y_min, y_max = x_min / aspect_ratio, x_max / aspect_ratio
 
 -- The current position of the mouse
 local x_pos, y_pos = 0, 0
@@ -15,6 +25,7 @@ local x_pos, y_pos = 0, 0
 -- The range and scale of the graph
 local x_min_scale, x_max_scale, y_min_scale, y_max_scale = 0, 0, 0, 0
 local x_range, y_range = 0, 0
+local zoom_factor = 1
 
 -- Step size for the graph
 -- the step between each point on the graph
@@ -31,8 +42,18 @@ local points = {}
 function f(x)
     -- The function to be visualised
     -- overcomplicated function for demonstration purposes
-    -- return math.cos(math.pi * x) * math.sin(a - x)
-    return math.sin(x + time) + math.sin(2 * x + time) + math.sin(3 * x + time) + math.sin(4 * x + time) + math.sin(5 * x + time) + math.sin(6 * x + time) + math.sin(7 * x + time) + math.sin(8 * x + time) + math.sin(9 * x + time) + math.sin(10 * x + time)
+    return math.cos(math.pi * x) * math.sin(time - x)
+end
+
+function visualiser.load()
+    -- Load the visualiser
+end
+
+function visualiser.update_range()
+    -- Update the range of the graph
+    -- The range of the graph should be updated based on the window dimensions
+    aspect_ratio = love.graphics.getWidth() / love.graphics.getHeight()
+    y_min, y_max = x_min / aspect_ratio, x_max / aspect_ratio
 end
 
 function visualiser.handle_input(key)
@@ -86,11 +107,23 @@ function visualiser.handle_scroll(x, y)
         x_max = x_max - (x_max - x_max_scale) / 10
         y_min = y_min + (y_min_scale - y_min) / 10
         y_max = y_max - (y_max - y_max_scale) / 10
+        -- update zoom factor depending on the scroll direction
+        zoom_factor = zoom_factor * 1.1
     else
         x_min = x_min - (x_min_scale - x_min) / 10
         x_max = x_max + (x_max - x_max_scale) / 10
         y_min = y_min - (y_min_scale - y_min) / 10
         y_max = y_max + (y_max - y_max_scale) / 10
+        -- update zoom factor
+        zoom_factor = zoom_factor / 1.1
+    end
+
+    -- update font size
+    local temp_font_size = 15 * zoom_factor
+    if temp_font_size < 1 then
+        font_size = 1
+    else
+        font_size = temp_font_size
     end
 end
 
@@ -103,12 +136,19 @@ function visualiser.update(dt)
     -- update the step size based on the zoom level and the window size
     step = 0.1 * (x_max - x_min) / love.graphics.getWidth()
 
+    -- font size
+    font = love.graphics.newFont("assets/fonts/NotoSansMath-Regular.ttf", font_size)
 
     -- update the time
-    time = time + dt
-    if time > 6.28318530718 then
+    time = time + speed * dt
+    if time > time_cap then
         time = 0
     end
+end
+
+function visualiser.resize()
+    -- Resize the visualiser
+    visualiser.update_range()
 end
 
 function visualiser.draw()
@@ -124,6 +164,40 @@ function visualiser.draw()
     -- move the line if the graph is moved
     love.graphics.line(0, height - (-y_min * y_scale), width, height - (-y_min * y_scale))
     love.graphics.line((0 - x_min) * x_scale, 0, (0 - x_min) * x_scale, height)
+
+    -- draw the unit line depending on the window dimensions, x_min, x_max, y_min, y_max
+    -- draw vertical unit line
+    if zoom_factor > 0.1 then
+        love.graphics.setColor(0.5, 0.5, 0.5, 0.5)
+        for x = math.ceil(x_min), math.floor(x_max) do
+            local x_pixel = (x - x_min) * x_scale
+            love.graphics.line(x_pixel, 0, x_pixel, height)
+        end
+
+        -- Draw horizontal unit lines
+        for y = math.ceil(y_min), math.floor(y_max) do
+            local y_pixel = height - (y - y_min) * y_scale
+            love.graphics.line(0, y_pixel, width, y_pixel)
+        end
+    end
+
+    -- draw the number labels
+    if font_size > 5 then
+        love.graphics.setFont(font)
+        love.graphics.setColor(1, 1, 1)
+        for x = math.ceil(x_min), math.floor(x_max) do
+            local x_pixel = (x - x_min) * x_scale
+            love.graphics.print(x, x_pixel + 2, height - (-y_min * y_scale))
+        end
+
+        -- do not draw the 0 label
+        for y = math.ceil(y_min), math.floor(y_max) do
+            if y ~= 0 then
+                local y_pixel = height - (y - y_min) * y_scale
+                love.graphics.print(y, (0 - x_min) * x_scale, y_pixel - 10)
+            end
+        end
+    end
 
     love.graphics.setColor(1, 0, 0)
     points = {}

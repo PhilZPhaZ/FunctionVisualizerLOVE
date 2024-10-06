@@ -8,10 +8,25 @@ CURRENT_STATE = ALL_STATES[1]
 WINDOW_WIDTH = 1280
 WINDOW_HEIGHT = 720
 
+-- Music
+local source
+local source_index = 1
+
 function love.load()
     love.window.setTitle("Function Visualiser")
     love.window.setMode(WINDOW_WIDTH, WINDOW_HEIGHT, {resizable=true})
     love.graphics.setBackgroundColor(0.1, 0.1, 0.1)
+
+    source = {
+        love.audio.newSource("assets/music/derive-time.mp3", "stream"),
+        love.audio.newSource("assets/music/graphical-dreams.mp3", "stream"),
+        love.audio.newSource("assets/music/integrate-time.mp3", "stream"),
+        love.audio.newSource("assets/music/ti-cs.mp3", "stream"),
+    }
+
+    -- Load the visualiser
+    visualiser.load()
+    visualiser.update_range()
 end
 
 function love.update(dt)
@@ -20,6 +35,15 @@ function love.update(dt)
 
     if CURRENT_STATE == "VISUALISER" then
         visualiser.update(dt)
+    end
+
+    -- music
+    if not source[source_index]:isPlaying() then
+        source_index = source_index + 1
+        if source_index > #source then
+            source_index = 1
+        end
+        source[source_index]:play()
     end
 end
 
@@ -50,6 +74,13 @@ end
 function love.wheelmoved(x, y)
     if CURRENT_STATE == "VISUALISER" then
         visualiser.handle_scroll(x, y)
+    end
+end
+
+function love.resize(w, h)
+    -- update window dimensions
+    if CURRENT_STATE == "VISUALISER" then
+        visualiser.resize()
     end
 end
 
