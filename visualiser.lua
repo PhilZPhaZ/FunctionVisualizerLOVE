@@ -39,6 +39,10 @@ local dx, dy = 0, 0
 -- points
 local points = {}
 
+-- label
+local x_pixel
+local y_pixel
+
 function f(x)
     -- The function to be visualised
     -- overcomplicated function for demonstration purposes
@@ -187,14 +191,14 @@ function visualiser.draw()
         love.graphics.setFont(font)
         love.graphics.setColor(1, 1, 1)
         for x = math.ceil(x_min), math.floor(x_max) do
-            local x_pixel = (x - x_min) * x_scale
+            x_pixel = (x - x_min) * x_scale
             love.graphics.print(x, x_pixel + 2, height - (-y_min * y_scale))
         end
 
         -- do not draw the 0 label
         for y = math.ceil(y_min), math.floor(y_max) do
             if y ~= 0 then
-                local y_pixel = height - (y - y_min) * y_scale
+                y_pixel = height - (y - y_min) * y_scale
                 love.graphics.print(y, (0 - x_min) * x_scale, y_pixel - 10)
             end
         end
