@@ -1,3 +1,16 @@
+--[[
+    main.lua
+
+    The main entry point for the application. This file is responsible for
+    setting up the game window and loading the visualiser module.
+
+    Authors:
+    philzphaz
+
+    Date:
+    2024
+]]
+
 local visualiser = require("visualiser")
 
 -- The current game state

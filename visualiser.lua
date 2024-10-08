@@ -1,5 +1,14 @@
 --[[
+    visualiser.lua
 
+    The visualiser module is responsible for visualising mathematical functions
+    in a graph. The module provides functionality for handling input, updating
+    the graph, and drawing the graph.
+
+    Authors:
+    philzphaz
+    Date:
+    2024
 ]]
 
 local visualiser = {}
@@ -11,7 +20,7 @@ local font_size = 15
 -- time
 local time = 0
 local time_cap = 2 * math.pi
-local speed = 1
+local speed = 20
 
 -- The range of the graph
 -- the 2 units should have the same length depending on the window dimensions
@@ -38,6 +47,7 @@ local dx, dy = 0, 0
 
 -- points
 local points = {}
+local line_width = 1.5
 
 -- label
 local x_pixel
@@ -205,6 +215,7 @@ function visualiser.draw()
     end
 
     love.graphics.setColor(1, 0, 0)
+    love.graphics.setLineWidth(line_width)
     points = {}
     for x = x_min, x_max, step do
         local y = f(x)
@@ -214,6 +225,7 @@ function visualiser.draw()
         table.insert(points, y_pixel)
     end
     love.graphics.line(points)
+    love.graphics.setLineWidth(1)
 end
 
 return visualiser
